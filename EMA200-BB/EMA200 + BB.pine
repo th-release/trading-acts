@@ -1,0 +1,45 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// EMA200과 볼린저밴드를 이용한 매매법
+// © cth_release
+//@version=5
+strategy("EMA200 + BB", overlay = true)
+var last_long_stop_price = 0.0
+var last_short_stop_price = 0.0
+
+// ---------------------------------------------------------------------------- BB
+src = input(close, title="Source")
+length = input.int(30, minval=1)
+mult = input.float(3.0, minval=0.001, maxval=50, title="StdDev")
+offset = input.int(0, "Offset", minval = -500, maxval = 500)
+
+[basis, upper, lower] = ta.bb(src, length, mult)
+plot(basis, "Basis", color=#FF6D00, offset = offset)
+p1 = plot(upper, "Upper", color=#2962FF, offset = offset)
+p2 = plot(lower, "Lower", color=#2962FF, offset = offset)
+fill(p1, p2, title = "Background", color=color.rgb(33, 150, 243, 95))
+
+// ---------------------------------------------------------------------------- BB
+
+ema = ta.ema(close, 200)
+plot(ema, "EMA", color.green, 2)
+
+long_start = ema > open and open < lower
+long_stop = open >= upper or last_long_stop_price >= open
+
+short_start = open > ema and open > upper
+short_stop = open <= lower or last_short_stop_price <= open
+
+
+if long_start
+    last_long_stop_price := low[1]
+    strategy.entry("Long", strategy.long)
+
+if long_stop
+    strategy.close("Long")
+
+if short_start
+    last_short_stop_price := high[1]
+    strategy.entry("Short", strategy.short)
+
+if short_stop
+    strategy.close("Short")
