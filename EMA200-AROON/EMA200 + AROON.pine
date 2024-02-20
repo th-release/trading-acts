@@ -1,0 +1,38 @@
+// This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// © cth_release
+
+//@version=5
+strategy("EMA200 + AROON")
+import TradingView/ta/7
+
+var stop_long_price = 0.0
+var stop_short_price = 0.0
+
+ema = ta.ema(close, 200)
+[k, d] = ta.aroon(14)
+
+hline(30)
+hline(70)
+
+plot(k, color=color.blue)
+plot(d, color=color.orange)
+
+long_start = ema > open and (k <= 30 and d <= 30) and ta.crossover(k, d)
+short_start = ema < open and (k >= 70 and d >= 70) and ta.crossunder(k, d)
+
+long_stop = (ema < open and (k == 100 or d == 100)) or open < stop_long_price
+short_stop = (ema > open and (k == 0 or d == 0)) or open > stop_short_price
+
+if long_start and strategy.position_size == 0
+    stop_short_price = low[1]
+    strategy.entry("Long", strategy.long)
+
+if long_stop
+    strategy.close("Long")
+
+if short_start and strategy.position_size == 0
+    stop_short_price = high[1]
+    strategy.entry("Short", strategy.short)
+
+if short_stop
+    strategy.close("Short")
