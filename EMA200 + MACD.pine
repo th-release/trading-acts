@@ -1,5 +1,5 @@
 // This Pine Script™ code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
-// EMA200 과 MACD를 이용하는 매매법
+// EMA200 과 MACD를 이용하여 
 // © cth_release
 
 //@version=5
@@ -16,7 +16,7 @@ plot(signalLine, linewidth = 1, color = color.orange)
 long_start = ema > open and (ta.crossover(macdLine, signalLine) and macdLine < 0 and signalLine < 0)
 long_stop = last_long_stop_price >= open or open >= (open - last_long_stop_price) * 2 + open
 short_start = ema < open and (ta.crossunder(macdLine, signalLine) and macdLine > 0 and signalLine > 0)
-short_stop = last_short_stop_price <= open or open <= (last_short_stop_price - open) * 2 + open
+short_stop = last_short_stop_price <= open or open - (last_short_stop_price - open) * 2 >= open
 
 if long_start
     last_long_stop_price := low[1]
